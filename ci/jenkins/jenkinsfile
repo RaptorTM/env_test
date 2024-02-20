@@ -1,0 +1,92 @@
+pipeline {
+    agent {
+        label "ubuntu_agent"
+    }
+
+    stages {
+        stage('Checkout Env Repository'){
+            steps {
+                dir('..\\env_repo'){
+                    git branch: "main",
+                    url: 'https://github.com/RaptorTM/env_test.git', 
+                    credentialsId: 'git_hub_token'
+                }
+            }
+        }
+        stage('Set Env from yaml'){
+            steps {
+                script {
+                    // GET SYSTEM ENV
+                    // Чтение переменных из YAML и определение переменных окружения
+                    def config = readYaml file: '..\\env_repo\\env\\env_dev.yaml'
+                    // Дальнейшая логика с использованием переменных окружения
+                    env.LINUX__________PATH = config.linux_path
+                    env.WIN__________PATH = config.win_path
+                    env.TEST__________NUM = config.test_num
+                    env.TEST__________TEXT = config.test_text
+                    env.ARRAY__________TEST = config.array[1]
+                    
+                    // GET DOCKER ENV
+                    // Чтение переменных из YAML и определение переменных окружения
+                    def docker_images = readYaml file: '..\\env_repo\\env\\docker_images.yaml'
+                    // Дальнейшая логика с использованием переменных окружения
+                    env.pgadmin = docker_images.pgadmin
+                    env.nginx = docker_images.nginx
+                    env.ingress = docker_images.ingress
+                    env.dotnet6_sdk = docker_images.dotnet6_sdk
+                    env.python_images = docker_images.python_images[1]
+                }
+            }
+        }
+
+        stage('Checkout App Repository'){
+            steps {
+                git branch: "develop",
+                url: 'https://github.com/ElvinaVen/Course_work_3.git'
+            }
+        }
+      
+        stage('Run App'){
+            steps {
+                sh'''
+                    pwd
+                    cd './Course_work_3/course_work_3'
+                    python3 main.py
+                '''
+            }
+        }
+
+        stage('Print env'){
+            steps{
+                script{
+                    println('=============================== Env ============================')
+                    echo "\n \
+                    ${env.LINUX__________PATH} \n \
+                    ${env.WIN__________PATH} \n \
+                    ${env.TEST__________NUM} \n \
+                    ${env.TEST__________TEXT} \n \
+                    ${env.ARRAY__________TEST}"
+                    println('=============================== Env END============================')
+            
+                    println('=============================== Docker Env ============================')
+                    echo "${env.pgadmin}"
+                    echo "${env.nginx}"
+                    echo "${env.ingress}"
+                    echo "${env.dotnet6_sdk}"
+                    echo "${env.python_images}"
+                    println('=============================== Docker Env END============================')
+                }
+            }
+        }
+
+        stage('Print system env'){
+            steps{
+                sh'''               
+                    echo '=============================== System Env ============================'
+                    env
+                    echo '=============================== System Env END============================'
+                '''
+            }
+        }
+    }
+}
