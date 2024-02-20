@@ -1,0 +1,8 @@
+linux_path: /home
+win_path: C:\test
+test_num: 323536
+test_text: "TEXT TEXT TEXT"
+array:
+  - element_1
+  - element_2
+  - element_3

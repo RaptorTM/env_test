@@ -5,4 +5,4 @@ dotnet6_sdk: bitnami/dotnet-sdk:6.0.419-debian-11-r8
 python_images:
   - python:3.9
   - python:3.11
-  - python:3.13
+  - python:3.13git
